@@ -1,4 +1,5 @@
 # Electron Repair
+An electron application to run repair/diagnostic scripts on Windows
 
 ## Install
 
@@ -10,7 +11,8 @@ cd Electron-Repair
 yarn install
 ```
 
-**Having issues installing? See our [debugging guide](https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues/400)**
+## Usage
+PIN: 111111
 
 ## Starting Development
 
