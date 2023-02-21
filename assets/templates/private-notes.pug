@@ -1,0 +1,207 @@
+doctype
+html
+  head
+    title Electron Repair - Report for #{hostname}
+    style(type="text/css").
+      body, html {
+        margin: 0;
+        padding: 0;
+        background-color: rgb(249 250 251);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      }
+      h1, h2, h3, h4 {
+        color: #0f172a;
+      }
+      .outer {
+        position: relative;
+        display: flex;
+        background-color: rgb(255 255 255);
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+        min-width: 640px;
+        max-width: 840px;
+        margin-top: 40px;
+        margin-bottom: 50px;
+        margin-right: auto;
+        margin-left: auto;
+        margin: auto;
+        padding-top: 20px;
+        padding-bottom: 20px;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      .logo {
+        width: 200px;
+      }
+      .header {
+        padding-top: 35px;
+        padding-bottom: 50px;
+        text-align: center;
+      }
+      .separator {
+        border-top: 4px;
+        border-bottom: 0px;
+        border-style: solid;
+        border-color: #d9d9d9;
+      }
+      .item {
+        width: 90%;
+        margin-right: auto;
+        margin-left: auto;
+        border-left: 0px;
+        border-right: 0px;
+        margin-bottom: 30px;
+      }
+      .subitem {
+        width: 90%;
+        margin-right: auto;
+        margin-left: auto;
+        border-left: 0px;
+        border-right: 0px;
+        margin-bottom: 30px;
+      }
+      .section {
+        border-top: 4px;
+        border-bottom: 4px;
+        border-left: 0px;
+        border-right: 0px;
+        margin-top: 30px;
+        border-color: #d9d9d9;
+        border-style: solid;
+        text-align: center;
+        background-color: #f1fdff;
+      }
+      .note {
+        border: 1px;
+        border-style: solid;
+        border-color: #f9e672;
+        background-color: #fffbe3;
+      }
+      .item-title {
+        font-weight: 900;
+      }
+      .subitem-title {
+        font-weight: 900;
+      }
+      .success {
+        border: 1px;
+        border-style: solid;
+        border-color: #83f972;
+        background-color: #e8ffe3;
+      }
+      .issues {
+        border: 1px;
+        border-style: solid;
+        border-color: #f78a2b;
+        background-color: #ffe3cb;
+      }
+      .failed {
+        border: 1px;
+        border-style: solid;
+        border-color: #ff4c4c;
+        background-color: #ffc6c6;
+      }
+      .unset {
+        border: 1px;
+        border-style: solid;
+        background-color: #fffbe3;
+      }
+      span {
+        color: rgb(75 85 99);
+      }
+  -
+    let scStyle = '';
+    let outputMsg = '';
+    const status = (status) => {
+      switch (status) {
+        case -1:
+          outputMsg = 'did not run';
+          break;
+        case 0:
+          outputMsg = 'success';
+          scStyle = 'success';
+          break;
+        case 1:
+          outputMsg = 'failed';
+          scStyle = 'failed';
+          break;
+        case 2:
+          outputMsg = 'issues found';
+          scStyle = 'issues';
+          break;
+        default:
+          outputMsg = 'script had issues running';
+          scStyle = 'failed';
+          break;
+      }
+    };
+  body
+    .outer
+      .header
+        h1 Electron Repair
+        h2 Report for #{hostname}
+        span= date
+        br
+        span Created by #{techName}
+      each section in sections
+        -
+          let sectionModified = false;
+          section.sectionItems.forEach((item) => {
+            if (
+              item.itemFlag !== 0 ||
+              (item.itemStatus !== 0 &&
+                item.itemStatus !== 1) ||
+              item.itemNotes.length > 0 ||
+              item.itemSubItems.length > 0
+            ) {
+              sectionModified = true;
+            }
+          });
+        if sectionModified
+          .section
+            h2(class='section-title')= section.sectionTitle
+        each item in section.sectionItems
+          - let itemRan = item.scriptOutput || item.itemNotes.length > 0 || item.itemSubItems.length > 0 || item.itemFlag !== 0;
+          if itemRan
+            - let hasTitle = item.itemTitle !== '' ? true : false;
+            if hasTitle
+              h3(class='item-title') #{item.itemTitle} ✓
+            else
+              h3(class='item-title') Untitled item ✓
+            .item
+              if item.scriptOutput
+                - const itemStatus = status(item.scriptExitCode)
+                div(class=scStyle)
+                  h4 Script status: #{outputMsg}
+                  each output in item.scriptOutput
+                    span= output
+                    br
+              - let hasPublicNotes = Object.keys(item.itemNotes).length;
+              if hasPublicNotes
+                h4 Public Notes:
+                .note
+                  each note in item.itemNotes
+                    - const noteBody = note.noteBody.split("\n");
+                    h4= note.noteTitle
+                    each line in noteBody
+                      span= line
+                      br
+            - let hasSubItems = Object.keys(item.itemSubItems).length;
+            if hasSubItems
+              h4 Sub-items:
+              .subitem
+                each subItem in item.itemSubItems
+                  h4(class='subitem-title') #{subItem.subItemTitle} ✓
+                  - let hasNotes = Object.keys(subItem.subItemNotes).length;
+                  if hasNotes
+                    h4 Private Notes:
+                    .note
+                      each note in subItem.subItemNotes
+                        - const noteBody = note.noteBody.split("\n");
+                        h4= note.noteTitle
+                        each line in noteBody
+                          span= line
+                          br
+            .separator
+          //hr

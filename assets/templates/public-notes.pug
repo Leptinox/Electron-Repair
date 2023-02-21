@@ -1,0 +1,36 @@
+
+h1(style='text-alingment: center;') Electron Repair Report
+h2 Report for #{hostname}
+span= date
+br
+each section in sections
+  -
+    let sectionModified = false;
+    section.sectionItems.forEach((item) => {
+      if (
+        item.itemFlag !== 0 ||
+        (item.itemStatus !== 0 &&
+          item.itemStatus !== 1) ||
+        item.itemNotes.length > 0 ||
+        item.itemSubItems.length > 0
+      ) {
+        sectionModified = true;
+      }
+    });
+  h2= section.sectionTitle
+  each item in section.sectionItems
+    - let itemRan = item.scriptOutput || item.itemNotes.length > 0 || item.itemSubItems.length > 0 || item.itemFlag !== 0;
+    if itemRan
+      if hasPublicNotes
+        - let hasTitle = item.itemTitle !== '' ? true : false;
+        if hasTitle
+          h3(class='item-title') #{item.itemTitle}
+        else
+          h3(class='item-title') Untitled item
+        h4 Notes:
+        each note in item.itemNotes
+          - const noteBody = note.noteBody.split("\n");
+          h4= note.noteTitle
+          each line in noteBody
+            span= line
+            br
